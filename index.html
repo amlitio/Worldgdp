@@ -3,59 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Economy 2026 | 3D Interactive</title>
+    <title>Global Economy 2026 | 3D Interactive Globe</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00ff88; --bg: #010103; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; }
+        :root { --accent: #00ff88; --bg: #050508; }
+        body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
         
-        /* UI HUD */
-        #ui-hud { position: absolute; top: 30px; left: 30px; pointer-events: none; z-index: 10; }
-        .stats { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; margin: 0; letter-spacing: -2px; }
+        /* Top UI */
+        #ui { position: absolute; top: 30px; left: 30px; pointer-events: none; z-index: 10; }
+        .stats { font-size: 3.5rem; font-weight: 900; margin: 0; letter-spacing: -3px; line-height: 1; }
         
-        /* Search Box */
-        #search-box {
+        /* Search Bar */
+        #search-container {
             position: absolute; top: 30px; right: 30px;
-            background: rgba(255,255,255,0.05); padding: 12px 20px;
-            border-radius: 50px; border: 1px solid var(--accent);
-            backdrop-filter: blur(15px); z-index: 100; display: flex; align-items: center;
+            background: rgba(255,255,255,0.05); padding: 10px 20px;
+            border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); z-index: 100;
+            display: flex; align-items: center;
         }
-        #search-input { background: none; border: none; color: white; outline: none; width: 150px; font-size: 14px; }
-
-        /* Timeline Controls */
-        #timeline {
-            position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
-            background: rgba(10,10,15,0.9); padding: 15px 40px; border-radius: 100px;
-            border: 1px solid #333; display: flex; align-items: center; gap: 25px; z-index: 100;
+        #search-input {
+            background: none; border: none; color: white; outline: none;
+            font-family: inherit; width: 150px; margin-left: 10px;
         }
-        input[type=range] { cursor: pointer; accent-color: var(--accent); width: 200px; }
-        #year-label { font-weight: 900; color: var(--accent); font-size: 1.3rem; min-width: 60px; }
 
-        /* Tooltip Card */
+        /* Bottom Controls */
+        #controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(15,15,20,0.9); padding: 15px 40px; border-radius: 50px;
+            border: 1px solid #333; backdrop-filter: blur(15px);
+            display: flex; align-items: center; gap: 25px; z-index: 100;
+        }
+        input[type=range] { cursor: pointer; accent-color: var(--accent); width: 220px; }
+        #year-display { font-weight: 900; color: var(--accent); font-size: 1.2rem; min-width: 60px; }
+
         #tooltip { 
-            position: absolute; background: rgba(0,0,0,0.9); padding: 15px; border-radius: 10px;
-            border: 1px solid var(--accent); display: none; pointer-events: none; z-index: 1000;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            position: absolute; background: rgba(0,0,0,0.95); padding: 15px; 
+            border-radius: 12px; border: 1px solid var(--accent); display: none; 
+            pointer-events: none; font-size: 14px; box-shadow: 0 0 20px rgba(0,255,136,0.2);
         }
     </style>
 </head>
 <body>
 
-    <div id="ui-hud">
-        <div style="color: #666; font-size: 0.8rem; letter-spacing: 3px; font-weight: bold;">WORLD PPP GDP 2026</div>
-        <div class="stats">$219.2T</div>
-        <div style="color: var(--accent); font-weight: bold; font-size: 0.8rem; margin-top: 10px;">● ENGINE: ACTIVE • 3D SPHERE</div>
+    <div id="ui">
+        <div style="color: #666; font-size: 0.8rem; letter-spacing: 3px; font-weight: 700;">WORLD PPP GDP PROJECTION</div>
+        <div class="stats" id="total-val">$219.2T</div>
+        <div style="color: var(--accent); font-weight: bold; margin-top: 10px; font-size: 0.8rem;">● LIVE 2026 SPHERICAL ENGINE</div>
     </div>
 
-    <div id="search-box">
-        <span style="margin-right: 10px;">🔍</span>
-        <input type="text" id="search-input" placeholder="Search Country...">
+    <div id="search-container">
+        <span>🔍</span>
+        <input type="text" id="search-input" placeholder="Find Country...">
     </div>
 
-    <div id="timeline">
-        <span style="font-size: 0.75rem; color: #555; font-weight: 900;">2024</span>
+    <div id="controls">
+        <span style="font-size: 0.7rem; color: #555; font-weight: 800;">2024</span>
         <input type="range" id="time-slider" min="2024" max="2026" step="0.01" value="2026">
-        <div id="year-label">2026</div>
+        <div id="year-display">2026</div>
     </div>
 
     <div id="tooltip"></div>
@@ -73,7 +78,7 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. DATA
+        // 1. DATA (2026 IMF/World Bank Projections)
         const economyData = [
             { name: "China", gdp: 43.5, lat: 35.8, lng: 104.1, color: "#ff3e3e" },
             { name: "USA", gdp: 31.8, lat: 37.0, lng: -95.7, color: "#3e70ff" },
@@ -82,100 +87,91 @@
             { name: "Japan", gdp: 6.9, lat: 36.2, lng: 138.2, color: "#ff5e5e" },
             { name: "Germany", gdp: 6.3, lat: 51.1, lng: 10.4, color: "#ffcc00" },
             { name: "Indonesia", gdp: 5.4, lat: -0.7, lng: 113.9, color: "#ff4e4e" },
-            { name: "Brazil", gdp: 5.2, lat: -14.2, lng: -51.9, color: "#00c853" }
+            { name: "Brazil", gdp: 5.2, lat: -14.2, lng: -51.9, color: "#00c853" },
+            { name: "UK", gdp: 4.6, lat: 55.3, lng: -3.4, color: "#4e7eff" },
+            { name: "France", gdp: 4.7, lat: 46.2, lng: 2.2, color: "#4e7eff" }
         ];
 
-        // 2. SCENE
+        // 2. SCENE SETUP
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.minDistance = 80;
-        controls.maxDistance = 400;
-        camera.position.set(0, 0, 180);
+        camera.position.set(0, 0, 130);
 
-        // Stars Background
+        // Starfield Background
         const starGeo = new THREE.BufferGeometry();
-        const starPositions = [];
-        for(let i=0; i<7000; i++) starPositions.push((Math.random()-0.5)*1500, (Math.random()-0.5)*1500, (Math.random()-0.5)*1500);
-        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPositions, 3));
-        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0x888888, size: 0.7})));
+        const starCoords = [];
+        for(let i=0; i<5000; i++) {
+            starCoords.push((Math.random()-0.5)*1000, (Math.random()-0.5)*1000, (Math.random()-0.5)*1000);
+        }
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0x444444, size: 0.7}));
+        scene.add(stars);
 
-        // 3. THE GLOBE (With Texture)
+        // 3. THE GLOBE
+        const radius = 45;
         const globeGroup = new THREE.Group();
         scene.add(globeGroup);
 
-        const radius = 55;
-        const textureLoader = new THREE.TextureLoader();
-        const worldMap = textureLoader.load('https://unpkg.com/three-globe/example/img/earth-dark.jpg');
-
         const globe = new THREE.Mesh(
             new THREE.SphereGeometry(radius, 64, 64),
-            new THREE.MeshStandardMaterial({ 
-                map: worldMap,
-                color: 0x222222,
-                roughness: 0.8,
-                metalness: 0.2
-            })
+            new THREE.MeshStandardMaterial({ color: 0x050508, emissive: 0x0a0a1a, roughness: 0.7, metalness: 0.2 })
         );
         globeGroup.add(globe);
 
-        // Glowing Atmosphere Ring
+        // Glowing Atmosphere effect
         const atmo = new THREE.Mesh(
-            new THREE.SphereGeometry(radius + 1.5, 64, 64),
-            new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.05 })
+            new THREE.SphereGeometry(radius + 0.5, 64, 64),
+            new THREE.MeshBasicMaterial({ color: 0x3366ff, wireframe: true, transparent: true, opacity: 0.05 })
         );
         globeGroup.add(atmo);
 
         // 4. DATA TOWERS
-        const barMeshes = [];
-        economyData.forEach(d => {
-            const h = d.gdp * 1.2;
-            const geo = new THREE.BoxGeometry(2.5, 2.5, h);
-            geo.translate(0, 0, h/2); // Grow from surface
-            const mat = new THREE.MeshStandardMaterial({ color: d.color, emissive: d.color, emissiveIntensity: 1 });
-            const mesh = new THREE.Mesh(geo, mat);
+        const barGroup = new THREE.Group();
+        globeGroup.add(barGroup);
 
-            const phi = (90 - d.lat) * (Math.PI / 180);
-            const theta = (d.lng + 180) * (Math.PI / 180);
-            mesh.position.set(-radius * Math.sin(phi) * Math.cos(theta), radius * Math.cos(phi), radius * Math.sin(phi) * Math.sin(theta));
-            mesh.lookAt(0,0,0);
-            mesh.userData = d;
-            globeGroup.add(mesh);
-            barMeshes.push(mesh);
+        const bars = [];
+        economyData.forEach(data => {
+            const barHeight = data.gdp * 0.8;
+            const geo = new THREE.BoxGeometry(1.8, 1.8, barHeight);
+            geo.translate(0, 0, barHeight / 2); // Pivot from base
+            
+            const mat = new THREE.MeshStandardMaterial({ 
+                color: data.color, emissive: data.color, emissiveIntensity: 0.6,
+                transparent: true, opacity: 0.9
+            });
+            
+            const bar = new THREE.Mesh(geo, mat);
+
+            // Conversion to Spherical
+            const phi = (90 - data.lat) * (Math.PI / 180);
+            const theta = (data.lng + 180) * (Math.PI / 180);
+
+            bar.position.set(
+                -(radius) * Math.sin(phi) * Math.cos(theta),
+                (radius) * Math.cos(phi),
+                (radius) * Math.sin(phi) * Math.sin(theta)
+            );
+
+            bar.lookAt(0, 0, 0);
+            bar.userData = data;
+            barGroup.add(bar);
+            bars.push(bar);
         });
 
-        // 5. CLICK & SEARCH LOGIC
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const tooltip = document.getElementById('tooltip');
-
-        window.addEventListener('click', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const hits = raycaster.intersectObjects(barMeshes);
-
-            if (hits.length > 0) {
-                const data = hits[0].object.userData;
-                focusOn(data.name);
-                tooltip.style.display = 'block';
-                tooltip.style.left = e.clientX + 20 + 'px'; tooltip.style.top = e.clientY + 'px';
-                tooltip.innerHTML = `<strong>${data.name}</strong><br>GDP: $${data.gdp}T (PPP)`;
-            } else { tooltip.style.display = 'none'; }
-        });
-
-        function focusOn(name) {
-            const b = barMeshes.find(m => m.userData.name.toLowerCase() === name.toLowerCase());
-            if (b) {
-                const pos = b.position.clone().applyMatrix4(globeGroup.matrixWorld).normalize().multiplyScalar(160);
-                gsap.to(camera.position, { x: pos.x, y: pos.y, z: pos.z, duration: 2, ease: "power3.inOut" });
-                gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 2 });
+        // 5. SEARCH & FLY-TO LOGIC
+        function focusOn(countryName) {
+            const found = bars.find(b => b.userData.name.toLowerCase() === countryName.toLowerCase());
+            if (found) {
+                const targetPos = found.position.clone().normalize().multiplyScalar(130);
+                gsap.to(camera.position, { x: targetPos.x, y: targetPos.y, z: targetPos.z, duration: 2, ease: "expo.inOut" });
+                gsap.to(controls.target, { x: found.position.x, y: found.position.y, z: found.position.z, duration: 2 });
             }
         }
 
@@ -183,22 +179,25 @@
             if(e.key === 'Enter') focusOn(e.target.value);
         });
 
-        // 6. RENDER LOOP & TIMELINE
-        document.getElementById('time-slider').addEventListener('input', (e) => {
+        // 6. TIME SLIDER
+        const slider = document.getElementById('time-slider');
+        const yearDisplay = document.getElementById('year-display');
+
+        slider.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
-            document.getElementById('year-label').innerText = Math.floor(val);
-            const growth = 0.8 + ((val - 2024) / 2) * 0.2;
-            barMeshes.forEach(b => b.scale.set(1, 1, growth));
+            yearDisplay.innerText = Math.floor(val);
+            const growth = 0.75 + ((val - 2024) / 2) * 0.25;
+            barGroup.children.forEach(bar => bar.scale.set(1, 1, growth));
         });
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-        const sun = new THREE.DirectionalLight(0xffffff, 1.5);
-        sun.position.set(100, 100, 100);
-        scene.add(sun);
+        // Lights
+        const pLight = new THREE.PointLight(0xffffff, 2500);
+        pLight.position.set(100, 100, 100);
+        scene.add(pLight, new THREE.AmbientLight(0xffffff, 0.4));
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.001; // Continuous Spin
+            globeGroup.rotation.y += 0.0008; // Very slow rotation
             controls.update();
             renderer.render(scene, camera);
         }
