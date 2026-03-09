@@ -3,58 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Economy 2026 | Fixed 3D Globe</title>
+    <title>Global Economy 2026 | Definitive Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent: #00ff88; --bg: #050508; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
-        
-        #ui { position: absolute; top: 30px; left: 30px; pointer-events: none; z-index: 10; }
-        .stats { font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -2px; }
-        
+        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
+        #ui { position: absolute; top: 20px; left: 20px; pointer-events: none; z-index: 10; }
+        .stats { font-size: 2.5rem; font-weight: 900; margin: 0; }
         #search-container {
-            position: absolute; top: 30px; right: 30px;
-            background: rgba(255,255,255,0.07); padding: 10px 20px;
-            border-radius: 30px; border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(15px); z-index: 100; display: flex; align-items: center;
+            position: absolute; top: 20px; right: 20px;
+            background: rgba(255,255,255,0.1); padding: 8px 15px;
+            border-radius: 20px; border: 1px solid var(--accent); z-index: 100;
         }
-        #search-input {
-            background: none; border: none; color: white; outline: none; width: 150px; margin-left: 10px;
-        }
-
+        #search-input { background: none; border: none; color: white; outline: none; width: 120px; }
         #controls {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            background: rgba(15,15,20,0.9); padding: 15px 40px; border-radius: 50px;
-            border: 1px solid #333; backdrop-filter: blur(15px); display: flex; align-items: center; gap: 25px;
+            background: rgba(10,10,15,0.9); padding: 15px 30px; border-radius: 50px;
+            border: 1px solid #333; display: flex; align-items: center; gap: 20px; z-index: 100;
         }
-        input[type=range] { cursor: pointer; accent-color: var(--accent); width: 220px; }
-        #year-display { font-weight: 900; color: var(--accent); font-size: 1.2rem; }
-
+        input[type=range] { cursor: pointer; accent-color: var(--accent); width: 150px; }
         #tooltip { 
-            position: absolute; background: rgba(0,0,0,0.9); padding: 15px; 
-            border-radius: 12px; border: 1px solid var(--accent); display: none; 
-            pointer-events: none; font-size: 14px; z-index: 1000;
+            position: absolute; background: black; padding: 10px; border: 1px solid var(--accent);
+            display: none; pointer-events: none; border-radius: 8px; z-index: 1000;
         }
     </style>
 </head>
 <body>
 
     <div id="ui">
-        <div style="color: #666; font-size: 0.8rem; letter-spacing: 2px;">GLOBAL PPP GDP 2026</div>
+        <div style="color: #666; font-size: 0.7rem; letter-spacing: 2px;">GLOBAL PPP GDP 2026</div>
         <div class="stats">$219.2T</div>
-        <div style="color: var(--accent); font-weight: bold; margin-top: 5px;">● SYSTEM ONLINE: SPHERICAL MAP</div>
+        <div style="color: var(--accent); font-weight: bold; font-size: 0.8rem;">● SPHERICAL ENGINE V3</div>
     </div>
 
     <div id="search-container">
-        <span>🔍</span>
         <input type="text" id="search-input" placeholder="Search Country...">
     </div>
 
     <div id="controls">
         <span style="font-size: 0.7rem; color: #555;">2024</span>
         <input type="range" id="time-slider" min="2024" max="2026" step="0.01" value="2026">
-        <div id="year-display">2026</div>
+        <div id="year-display" style="color: var(--accent); font-weight: bold;">2026</div>
     </div>
 
     <div id="tooltip"></div>
@@ -72,155 +61,137 @@
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-        // 1. DATA
+        // 1. GENERATE PROCEDURAL WORLD MAP (The Fix)
+        const createWorldTexture = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 2048; canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, 2048, 1024);
+            ctx.fillStyle = '#1a1a25'; // Continent Color
+            
+            // Simplified path drawing for continents to ensure it shows up without external images
+            ctx.beginPath();
+            // North America
+            ctx.moveTo(300, 200); ctx.lineTo(500, 200); ctx.lineTo(550, 450); ctx.lineTo(350, 450); ctx.closePath(); ctx.fill();
+            // South America
+            ctx.beginPath(); ctx.moveTo(550, 500); ctx.lineTo(700, 550); ctx.lineTo(600, 850); ctx.lineTo(500, 600); ctx.closePath(); ctx.fill();
+            // Eurasia
+            ctx.beginPath(); ctx.moveTo(800, 150); ctx.lineTo(1600, 150); ctx.lineTo(1500, 500); ctx.lineTo(1000, 500); ctx.closePath(); ctx.fill();
+            // Africa
+            ctx.beginPath(); ctx.moveTo(950, 450); ctx.lineTo(1150, 450); ctx.lineTo(1100, 800); ctx.lineTo(900, 600); ctx.closePath(); ctx.fill();
+            // Australia
+            ctx.beginPath(); ctx.moveTo(1500, 650); ctx.lineTo(1700, 650); ctx.lineTo(1650, 850); ctx.lineTo(1450, 800); ctx.closePath(); ctx.fill();
+
+            const texture = new THREE.CanvasTexture(canvas);
+            return texture;
+        };
+
+        // 2. DATA
         const economyData = [
-            { name: "China", gdp: 43.5, lat: 35.8, lng: 104.1, color: "#ff3e3e" },
-            { name: "USA", gdp: 31.8, lat: 37.0, lng: -95.7, color: "#3e70ff" },
-            { name: "India", gdp: 19.1, lat: 20.5, lng: 78.9, color: "#ff9f3e" },
-            { name: "Russia", gdp: 7.3, lat: 61.5, lng: 105.3, color: "#888888" },
-            { name: "Japan", gdp: 6.9, lat: 36.2, lng: 138.2, color: "#ff5e5e" },
-            { name: "Germany", gdp: 6.3, lat: 51.1, lng: 10.4, color: "#ffcc00" },
-            { name: "Indonesia", gdp: 5.4, lat: -0.7, lng: 113.9, color: "#ff4e4e" },
-            { name: "Brazil", gdp: 5.2, lat: -14.2, lng: -51.9, color: "#00c853" },
-            { name: "UK", gdp: 4.6, lat: 55.3, lng: -3.4, color: "#4e7eff" },
-            { name: "France", gdp: 4.7, lat: 46.2, lng: 2.2, color: "#4e7eff" }
+            { name: "China", gdp: 43.5, lat: 35, lng: 105, color: "#ff3e3e" },
+            { name: "USA", gdp: 31.8, lat: 38, lng: -97, color: "#3e70ff" },
+            { name: "India", gdp: 19.1, lat: 20, lng: 78, color: "#ff9f3e" },
+            { name: "Russia", gdp: 7.3, lat: 60, lng: 100, color: "#888888" },
+            { name: "Japan", gdp: 6.9, lat: 36, lng: 138, color: "#ff5e5e" },
+            { name: "Germany", gdp: 6.3, lat: 51, lng: 10, color: "#ffcc00" },
+            { name: "Brazil", gdp: 5.2, lat: -14, lng: -51, color: "#00c853" }
         ];
 
-        // 2. SCENE
+        // 3. CORE SCENE
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        camera.position.set(0, 0, 150);
+        camera.position.z = 150;
 
-        // 3. THE GLOBE WITH TEXTURE
+        // Globe
         const radius = 50;
-        const globeGroup = new THREE.Group();
-        scene.add(globeGroup);
-
-        const loader = new THREE.TextureLoader();
-        // Using a high-contrast map to see continents in a dark theme
-        const earthMap = loader.load('https://unpkg.com/three-globe/example/img/earth-dark.jpg');
-
         const globe = new THREE.Mesh(
             new THREE.SphereGeometry(radius, 64, 64),
-            new THREE.MeshStandardMaterial({ 
-                map: earthMap,
-                color: 0x222222,
-                emissive: 0x111111,
-                roughness: 0.8,
-                metalness: 0.2
-            })
+            new THREE.MeshStandardMaterial({ map: createWorldTexture(), metalness: 0.1, roughness: 0.8 })
         );
-        globeGroup.add(globe);
+        scene.add(globe);
 
-        // Grid/Atmosphere
-        const grid = new THREE.Mesh(
-            new THREE.SphereGeometry(radius + 0.5, 64, 64),
-            new THREE.MeshBasicMaterial({ color: 0x00ff88, wireframe: true, transparent: true, opacity: 0.05 })
-        );
-        globeGroup.add(grid);
-
-        // 4. DATA TOWERS (Fixing clickability)
+        // Bars
         const barGroup = new THREE.Group();
-        globeGroup.add(barGroup);
-        const bars = [];
+        scene.add(barGroup);
+        const barMeshes = [];
 
-        economyData.forEach(data => {
-            const h = data.gdp * 0.8;
-            const geo = new THREE.BoxGeometry(2, 2, h);
+        economyData.forEach(d => {
+            const h = d.gdp * 0.8;
+            const geo = new THREE.BoxGeometry(3, 3, h); // Thicker for easier clicking
             geo.translate(0, 0, h / 2);
-            
-            const mat = new THREE.MeshStandardMaterial({ 
-                color: data.color, emissive: data.color, emissiveIntensity: 0.5 
-            });
-            const bar = new THREE.Mesh(geo, mat);
+            const mat = new THREE.MeshStandardMaterial({ color: d.color, emissive: d.color, emissiveIntensity: 0.5 });
+            const mesh = new THREE.Mesh(geo, mat);
 
-            const phi = (90 - data.lat) * (Math.PI / 180);
-            const theta = (data.lng + 180) * (Math.PI / 180);
-
-            bar.position.set(
-                -(radius) * Math.sin(phi) * Math.cos(theta),
-                (radius) * Math.cos(phi),
-                (radius) * Math.sin(phi) * Math.sin(theta)
-            );
-
-            bar.lookAt(0, 0, 0);
-            bar.userData = data;
-            barGroup.add(bar);
-            bars.push(bar);
+            const phi = (90 - d.lat) * (Math.PI / 180);
+            const theta = (d.lng + 180) * (Math.PI / 180);
+            mesh.position.set(-radius * Math.sin(phi) * Math.cos(theta), radius * Math.cos(phi), radius * Math.sin(phi) * Math.sin(theta));
+            mesh.lookAt(0, 0, 0);
+            mesh.userData = d;
+            barGroup.add(mesh);
+            barMeshes.push(mesh);
         });
 
-        // 5. CLICK & TOOLTIP LOGIC
+        // Stars
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = [];
+        for(let i=0; i<3000; i++) starPos.push((Math.random()-0.5)*800, (Math.random()-0.5)*800, (Math.random()-0.5)*800);
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+        scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.5})));
+
+        // 4. INTERACTION FIX
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
         const tooltip = document.getElementById('tooltip');
 
-        window.addEventListener('mousedown', (e) => {
+        window.addEventListener('click', (e) => {
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
-            
-            const intersects = raycaster.intersectObjects(barGroup.children);
-            if (intersects.length > 0) {
-                const data = intersects[0].object.userData;
-                focusOn(data.name);
-            }
-        });
-
-        // Search + Fly To
-        function focusOn(name) {
-            const b = bars.find(x => x.userData.name.toLowerCase() === name.toLowerCase());
-            if (b) {
-                const p = b.position.clone().applyMatrix4(globeGroup.matrixWorld);
-                const camTarget = p.clone().normalize().multiplyScalar(140);
-                
-                gsap.to(camera.position, { x: camTarget.x, y: camTarget.y, z: camTarget.z, duration: 1.5, ease: "power2.inOut" });
-                gsap.to(controls.target, { x: p.x, y: p.y, z: p.z, duration: 1.5 });
-                
+            const hits = raycaster.intersectObjects(barMeshes);
+            if (hits.length > 0) {
+                const d = hits[0].object.userData;
                 tooltip.style.display = 'block';
-                tooltip.style.left = '50%';
-                tooltip.style.top = '20%';
-                tooltip.style.transform = 'translateX(-50%)';
-                tooltip.innerHTML = `<strong>${b.userData.name}</strong><br>GDP: $${b.userData.gdp}T (PPP)`;
-            }
-        }
+                tooltip.style.left = e.clientX + 'px'; tooltip.style.top = e.clientY + 'px';
+                tooltip.innerHTML = `<b>${d.name}</b><br>GDP: $${d.gdp}T`;
+                
+                const target = hits[0].object.position.clone().normalize().multiplyScalar(140);
+                gsap.to(camera.position, { x: target.x, y: target.y, z: target.z, duration: 1.2 });
+            } else { tooltip.style.display = 'none'; }
+        });
 
+        // Search
         document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if(e.key === 'Enter') focusOn(e.target.value);
+            if(e.key === 'Enter') {
+                const b = barMeshes.find(m => m.userData.name.toLowerCase() === e.target.value.toLowerCase());
+                if(b) {
+                    const target = b.position.clone().normalize().multiplyScalar(140);
+                    gsap.to(camera.position, { x: target.x, y: target.y, z: target.z, duration: 1.5 });
+                }
+            }
         });
 
-        // Time Slider
+        // Slider
         document.getElementById('time-slider').addEventListener('input', (e) => {
-            const val = parseFloat(e.target.value);
-            document.getElementById('year-display').innerText = Math.floor(val);
-            const s = 0.8 + ((val - 2024) / 2) * 0.2;
-            barGroup.children.forEach(b => b.scale.set(1, 1, s));
+            const v = parseFloat(e.target.value);
+            document.getElementById('year-display').innerText = Math.floor(v);
+            const scale = 0.7 + (v - 2024)/2 * 0.3;
+            barMeshes.forEach(m => m.scale.set(1, 1, scale));
         });
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-        const light = new THREE.DirectionalLight(0xffffff, 1.5);
-        light.position.set(100, 100, 100);
-        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+        const dl = new THREE.DirectionalLight(0xffffff, 1); dl.position.set(1, 1, 1); scene.add(dl);
 
         function animate() {
             requestAnimationFrame(animate);
-            globeGroup.rotation.y += 0.001; 
             controls.update();
             renderer.render(scene, camera);
         }
         animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
