@@ -3,62 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Global Economy 2026 | Interactive Map</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>Global Economy 2026 | 3D Interactive Globe</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --accent: #00ff88;
-            --bg: #0a0a0c;
-            --panel: rgba(15, 15, 18, 0.9);
-        }
+        :root { --accent: #00ff88; --bg: #050508; }
         body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
         
-        #ui-layer { 
-            position: absolute; top: 30px; left: 30px; 
-            pointer-events: none; z-index: 10; 
-        }
-        .stats { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; margin: 0; letter-spacing: -2px; line-height: 1; }
-        .sub { color: #666; letter-spacing: 2px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+        /* Top UI */
+        #ui { position: absolute; top: 30px; left: 30px; pointer-events: none; z-index: 10; }
+        .stats { font-size: 3.5rem; font-weight: 900; margin: 0; letter-spacing: -3px; line-height: 1; }
         
-        #controls {
-            position: absolute; bottom: 30px; left: 50%;
-            transform: translateX(-50%);
-            background: var(--panel);
-            padding: 15px 30px;
-            border-radius: 100px;
-            border: 1px solid #222;
-            backdrop-filter: blur(20px);
-            display: flex; align-items: center; gap: 20px;
-            z-index: 100; box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        /* Search Bar */
+        #search-container {
+            position: absolute; top: 30px; right: 30px;
+            background: rgba(255,255,255,0.05); padding: 10px 20px;
+            border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px); z-index: 100;
+            display: flex; align-items: center;
         }
-        input[type=range] { cursor: pointer; accent-color: var(--accent); width: 180px; }
-        #year-display { font-weight: 800; color: var(--accent); width: 50px; text-align: center; }
+        #search-input {
+            background: none; border: none; color: white; outline: none;
+            font-family: inherit; width: 150px; margin-left: 10px;
+        }
+
+        /* Bottom Controls */
+        #controls {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(15,15,20,0.9); padding: 15px 40px; border-radius: 50px;
+            border: 1px solid #333; backdrop-filter: blur(15px);
+            display: flex; align-items: center; gap: 25px; z-index: 100;
+        }
+        input[type=range] { cursor: pointer; accent-color: var(--accent); width: 220px; }
+        #year-display { font-weight: 900; color: var(--accent); font-size: 1.2rem; min-width: 60px; }
 
         #tooltip { 
-            position: absolute; background: var(--panel); 
-            padding: 15px; border-radius: 12px; border: 1px solid #333; 
-            display: none; pointer-events: none; font-size: 14px;
-            backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            z-index: 1000;
+            position: absolute; background: rgba(0,0,0,0.95); padding: 15px; 
+            border-radius: 12px; border: 1px solid var(--accent); display: none; 
+            pointer-events: none; font-size: 14px; box-shadow: 0 0 20px rgba(0,255,136,0.2);
         }
-        .hint { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); color: #444; font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
-    <div id="ui-layer">
-        <div class="sub">World PPP GDP Projection</div>
-        <div class="stats" id="main-display">$219.2T</div>
-        <div style="color: var(--accent); font-size: 0.8rem; margin-top: 8px;">
-            <span style="opacity: 0.6">Status:</span> LIVE 2026 FORECAST
-        </div>
+    <div id="ui">
+        <div style="color: #666; font-size: 0.8rem; letter-spacing: 3px; font-weight: 700;">WORLD PPP GDP PROJECTION</div>
+        <div class="stats" id="total-val">$219.2T</div>
+        <div style="color: var(--accent); font-weight: bold; margin-top: 10px; font-size: 0.8rem;">● LIVE 2026 SPHERICAL ENGINE</div>
     </div>
 
-    <div class="hint">Click a country to inspect • Click background to reset</div>
+    <div id="search-container">
+        <span>🔍</span>
+        <input type="text" id="search-input" placeholder="Find Country...">
+    </div>
 
     <div id="controls">
-        <span class="sub">2024</span>
+        <span style="font-size: 0.7rem; color: #555; font-weight: 800;">2024</span>
         <input type="range" id="time-slider" min="2024" max="2026" step="0.01" value="2026">
         <div id="year-display">2026</div>
     </div>
@@ -69,8 +69,7 @@
         {
             "imports": {
                 "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
-                "d3-delaunay": "https://cdn.skypack.dev/d3-delaunay@6"
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
             }
         }
     </script>
@@ -78,161 +77,127 @@
     <script type="module">
         import * as THREE from 'three';
         import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-        import { Delaunay } from 'd3-delaunay';
 
-        // 1. DATA CONFIG (2026 Projections)
+        // 1. DATA (2026 IMF/World Bank Projections)
         const economyData = [
-            { name: "China", gdp2026: 43.5, startFactor: 0.88, color: "#ff3e3e" },
-            { name: "USA", gdp2026: 31.8, startFactor: 0.94, color: "#3e70ff" },
-            { name: "India", gdp2026: 19.1, startFactor: 0.82, color: "#ff9f3e" },
-            { name: "Russia", gdp2026: 7.3, startFactor: 0.96, color: "#888888" },
-            { name: "Japan", gdp2026: 6.9, startFactor: 0.98, color: "#ff5e5e" },
-            { name: "Germany", gdp2026: 6.3, startFactor: 0.97, color: "#ffcc00" },
-            { name: "Indonesia", gdp2026: 5.4, startFactor: 0.89, color: "#ff4e4e" },
-            { name: "Brazil", gdp2026: 5.2, startFactor: 0.93, color: "#00c853" },
-            { name: "UK", gdp2026: 4.6, startFactor: 0.96, color: "#4e7eff" },
-            { name: "France", gdp2026: 4.7, startFactor: 0.97, color: "#4e7eff" }
+            { name: "China", gdp: 43.5, lat: 35.8, lng: 104.1, color: "#ff3e3e" },
+            { name: "USA", gdp: 31.8, lat: 37.0, lng: -95.7, color: "#3e70ff" },
+            { name: "India", gdp: 19.1, lat: 20.5, lng: 78.9, color: "#ff9f3e" },
+            { name: "Russia", gdp: 7.3, lat: 61.5, lng: 105.3, color: "#ffffff" },
+            { name: "Japan", gdp: 6.9, lat: 36.2, lng: 138.2, color: "#ff5e5e" },
+            { name: "Germany", gdp: 6.3, lat: 51.1, lng: 10.4, color: "#ffcc00" },
+            { name: "Indonesia", gdp: 5.4, lat: -0.7, lng: 113.9, color: "#ff4e4e" },
+            { name: "Brazil", gdp: 5.2, lat: -14.2, lng: -51.9, color: "#00c853" },
+            { name: "UK", gdp: 4.6, lat: 55.3, lng: -3.4, color: "#4e7eff" },
+            { name: "France", gdp: 4.7, lat: 46.2, lng: 2.2, color: "#4e7eff" }
         ];
 
         // 2. SCENE SETUP
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.maxPolarAngle = Math.PI / 2.1;
-        camera.position.set(0, 60, 80);
+        camera.position.set(0, 0, 130);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-        const spotlight = new THREE.PointLight(0xffffff, 10000);
-        spotlight.position.set(20, 100, 20);
-        scene.add(spotlight);
+        // Starfield Background
+        const starGeo = new THREE.BufferGeometry();
+        const starCoords = [];
+        for(let i=0; i<5000; i++) {
+            starCoords.push((Math.random()-0.5)*1000, (Math.random()-0.5)*1000, (Math.random()-0.5)*1000);
+        }
+        starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starCoords, 3));
+        const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color: 0x444444, size: 0.7}));
+        scene.add(stars);
 
-        // 3. VORONOI GENERATION
-        const group = new THREE.Group();
-        scene.add(group);
+        // 3. THE GLOBE
+        const radius = 45;
+        const globeGroup = new THREE.Group();
+        scene.add(globeGroup);
 
-        const points = economyData.map(() => [Math.random() * 90 - 45, Math.random() * 90 - 45]);
-        const voronoi = Delaunay.from(points).voronoi([-55, -55, 55, 55]);
+        const globe = new THREE.Mesh(
+            new THREE.SphereGeometry(radius, 64, 64),
+            new THREE.MeshStandardMaterial({ color: 0x050508, emissive: 0x0a0a1a, roughness: 0.7, metalness: 0.2 })
+        );
+        globeGroup.add(globe);
 
-        economyData.forEach((data, i) => {
-            const coords = voronoi.cellPolygon(i);
-            if (!coords) return;
+        // Glowing Atmosphere effect
+        const atmo = new THREE.Mesh(
+            new THREE.SphereGeometry(radius + 0.5, 64, 64),
+            new THREE.MeshBasicMaterial({ color: 0x3366ff, wireframe: true, transparent: true, opacity: 0.05 })
+        );
+        globeGroup.add(atmo);
 
-            const shape = new THREE.Shape();
-            shape.moveTo(coords[0][0], coords[0][1]);
-            coords.forEach(p => shape.lineTo(p[0], p[1]));
+        // 4. DATA TOWERS
+        const barGroup = new THREE.Group();
+        globeGroup.add(barGroup);
 
-            const geometry = new THREE.ExtrudeGeometry(shape, { 
-                depth: data.gdp2026, 
-                bevelEnabled: true, 
-                bevelSize: 0.4, 
-                bevelThickness: 0.4 
-            });
-
-            const material = new THREE.MeshStandardMaterial({ 
-                color: new THREE.Color(data.color), 
-                metalness: 0.5, 
-                roughness: 0.2 
-            });
-
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.rotation.x = -Math.PI / 2;
-            mesh.userData = data;
+        const bars = [];
+        economyData.forEach(data => {
+            const barHeight = data.gdp * 0.8;
+            const geo = new THREE.BoxGeometry(1.8, 1.8, barHeight);
+            geo.translate(0, 0, barHeight / 2); // Pivot from base
             
-            const edges = new THREE.EdgesGeometry(geometry);
-            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.15 }));
-            mesh.add(line);
+            const mat = new THREE.MeshStandardMaterial({ 
+                color: data.color, emissive: data.color, emissiveIntensity: 0.6,
+                transparent: true, opacity: 0.9
+            });
+            
+            const bar = new THREE.Mesh(geo, mat);
 
-            group.add(mesh);
+            // Conversion to Spherical
+            const phi = (90 - data.lat) * (Math.PI / 180);
+            const theta = (data.lng + 180) * (Math.PI / 180);
+
+            bar.position.set(
+                -(radius) * Math.sin(phi) * Math.cos(theta),
+                (radius) * Math.cos(phi),
+                (radius) * Math.sin(phi) * Math.sin(theta)
+            );
+
+            bar.lookAt(0, 0, 0);
+            bar.userData = data;
+            barGroup.add(bar);
+            bars.push(bar);
         });
 
-        // 4. ANIMATION & FLY-TO
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        const tooltip = document.getElementById('tooltip');
-
-        function flyTo(targetMesh) {
-            // Calculate center of the polygon
-            const box = new THREE.Box3().setFromObject(targetMesh);
-            const center = new THREE.Vector3();
-            box.getCenter(center);
-
-            gsap.to(camera.position, {
-                x: center.x,
-                y: center.y + 40,
-                z: center.z + 30,
-                duration: 1.5,
-                ease: "power3.inOut"
-            });
-            gsap.to(controls.target, {
-                x: center.x,
-                y: center.y,
-                z: center.z,
-                duration: 1.5,
-                ease: "power3.inOut"
-            });
-        }
-
-        function resetCamera() {
-            gsap.to(camera.position, { x: 0, y: 60, z: 80, duration: 1.5, ease: "power2.inOut" });
-            gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5, ease: "power2.inOut" });
-        }
-
-        window.addEventListener('click', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            
-            const intersects = raycaster.intersectObjects(group.children);
-            if (intersects.length > 0) {
-                flyTo(intersects[0].object);
-            } else {
-                resetCamera();
+        // 5. SEARCH & FLY-TO LOGIC
+        function focusOn(countryName) {
+            const found = bars.find(b => b.userData.name.toLowerCase() === countryName.toLowerCase());
+            if (found) {
+                const targetPos = found.position.clone().normalize().multiplyScalar(130);
+                gsap.to(camera.position, { x: targetPos.x, y: targetPos.y, z: targetPos.z, duration: 2, ease: "expo.inOut" });
+                gsap.to(controls.target, { x: found.position.x, y: found.position.y, z: found.position.z, duration: 2 });
             }
+        }
+
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') focusOn(e.target.value);
         });
 
-        // 5. SLIDER LOGIC
+        // 6. TIME SLIDER
         const slider = document.getElementById('time-slider');
         const yearDisplay = document.getElementById('year-display');
 
         slider.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             yearDisplay.innerText = Math.floor(val);
-            const progress = (val - 2024) / 2; 
-
-            group.children.forEach(mesh => {
-                const start = mesh.userData.startFactor;
-                const scale = start + (progress * (1 - start));
-                mesh.scale.set(1, 1, scale);
-            });
+            const growth = 0.75 + ((val - 2024) / 2) * 0.25;
+            barGroup.children.forEach(bar => bar.scale.set(1, 1, growth));
         });
 
-        // 6. TOOLTIP MOUSEMOVE
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObjects(group.children);
-
-            if (intersects.length > 0) {
-                const d = intersects[0].object.userData;
-                const currentGdp = (d.gdp2026 * intersects[0].object.scale.z).toFixed(1);
-                tooltip.style.display = 'block';
-                tooltip.style.left = e.clientX + 20 + 'px';
-                tooltip.style.top = e.clientY + 20 + 'px';
-                tooltip.innerHTML = `<strong>${d.name}</strong><br><span style="color:var(--accent)">$${currentGdp}T PPP</span>`;
-            } else {
-                tooltip.style.display = 'none';
-            }
-        });
+        // Lights
+        const pLight = new THREE.PointLight(0xffffff, 2500);
+        pLight.position.set(100, 100, 100);
+        scene.add(pLight, new THREE.AmbientLight(0xffffff, 0.4));
 
         function animate() {
             requestAnimationFrame(animate);
+            globeGroup.rotation.y += 0.0008; // Very slow rotation
             controls.update();
             renderer.render(scene, camera);
         }
